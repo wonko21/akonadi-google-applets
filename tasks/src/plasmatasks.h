@@ -23,6 +23,7 @@
 
 #include <KConfigDialog>
 
+#include <Plasma/Label>
 #include <Plasma/PushButton>
 #include <Plasma/PopupApplet>
 #include <Plasma/ScrollWidget>
@@ -69,10 +70,12 @@ private:
     QGraphicsWidget * m_widget;
     QGraphicsLinearLayout * m_mainLayout;
     QGraphicsLinearLayout * m_buttonLayout;
+    QGraphicsLinearLayout * m_labelLayout;
 
     TaskWidget * m_tasksList;
     TaskEditor * m_editor;
 
+    Plasma::Label * m_label;
     Plasma::PushButton * m_add;
     Plasma::PushButton * m_del;
     Plasma::ScrollWidget * m_scroll;

@@ -55,11 +55,19 @@ QGraphicsWidget * PlasmaTasks::graphicsWidget()
     if (!m_widget) {
         m_tasksList = new TaskWidget(this);
 
+	m_label = new Plasma::Label(this);
+	m_label ->setText("");
+	m_label ->setMaximumHeight(0);
+	m_label ->setAlignment(Qt::AlignHCenter);
+	m_labelLayout = new QGraphicsLinearLayout();
+	m_labelLayout -> addItem(m_label);
+	
         m_scroll = new Plasma::ScrollWidget(this);
         m_scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         m_scroll->setWidget(m_tasksList);
 
         m_mainLayout = new QGraphicsLinearLayout(Qt::Vertical);
+	m_mainLayout->addItem(m_labelLayout);
         m_mainLayout->addItem(m_scroll);
 
         m_add = new Plasma::PushButton(this);
@@ -84,6 +92,12 @@ QGraphicsWidget * PlasmaTasks::graphicsWidget()
 void PlasmaTasks::configChanged()
 {
     KConfigGroup conf = config();
+
+    m_label ->setText(conf.readEntry("labelText", ""));
+    if (m_label->text().isEmpty())
+      m_label ->setMaximumHeight(0);
+    else
+      m_label ->setMaximumHeight(15);
 
     m_tasksList->setAutoDeleteCompleted(conf.readEntry("autoDel", false));
     m_tasksList->setAutoHideCompleted(conf.readEntry("autoHide", false));
@@ -144,6 +158,7 @@ void PlasmaTasks::createConfigurationInterface(KConfigDialog * parent)
 
     appearanceconfigDialog.orderBy->setCurrentIndex(m_tasksList->orderBy());
     appearanceconfigDialog.orientation->setCurrentIndex(m_tasksList->checkboxesOrientation());
+    appearanceconfigDialog.labelText->setText(m_label->text());
 
     parent->addPage(widget1, i18n("Appearance"), "preferences-desktop");
 
@@ -157,6 +172,7 @@ void PlasmaTasks::createConfigurationInterface(KConfigDialog * parent)
     connect(appearanceconfigDialog.completedColor, SIGNAL(changed(QColor)), parent, SLOT(settingsModified()));
     connect(appearanceconfigDialog.orderBy, SIGNAL(currentIndexChanged(int)), parent, SLOT(settingsModified()));
     connect(appearanceconfigDialog.orientation, SIGNAL(currentIndexChanged(int)), parent, SLOT(settingsModified()));
+    connect(appearanceconfigDialog.labelText, SIGNAL(textEdited(QString)), parent, SLOT(settingsModified()));
     connect(configDialog.loadCollections, SIGNAL(clicked(bool)), SLOT(fetchCollections()));
 }
 
@@ -204,6 +220,9 @@ void PlasmaTasks::configAccepted()
 
     if (appearanceconfigDialog.orientation->currentIndex() != m_tasksList->checkboxesOrientation())
         conf.writeEntry("orientation", appearanceconfigDialog.orientation->currentIndex());
+    
+    if (appearanceconfigDialog.labelText->text() != m_label->text())
+        conf.writeEntry("labelText", appearanceconfigDialog.labelText->text());
 
     emit configNeedsSaving();
 }
